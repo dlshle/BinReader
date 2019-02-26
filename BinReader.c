@@ -1,12 +1,15 @@
 #include<stdio.h>
 #include<stdlib.h>
 
+#define NUM_MODES 5
+
+int is_valid_mode(char mode);
 void open_file(FILE *fp, char* file_addr, char mode);
 void read_binary_file(FILE *fp, char mode);
 void print_content(char *buffer, long size, char mode);
 void print_element(char *buffer, unsigned int index, char mode);
 
-void handle_error(char *msg)
+void error(char *msg)
 {
 	printf("%s\n",msg);
 	exit(1);
@@ -15,9 +18,20 @@ void handle_error(char *msg)
 int main(int argc, char* argv[])
 {
 	if(argc<3)
-		handle_error("ERROR: incomplete arguments!");
+		error("ERROR: incomplete arguments!");
+	if(!is_valid_mode(argv[2][0]))
+		error("ERROR: invalid mode!");	
 	FILE *fp;
 	open_file(fp, argv[1], argv[2][0]);
+	return 0;
+}
+
+int is_valid_mode(char mode)
+{
+	char modes[] = {'x','c','d','C','D'};
+	for(int i=0;i<NUM_MODES;i++)
+		if(mode==modes[i])
+			return 1;
 	return 0;
 }
 
@@ -25,7 +39,7 @@ void open_file(FILE *fp, char* file_addr, char mode)
 {
 	fp = fopen(file_addr, "rb");
 	if(fp == NULL)
-		handle_error("ERROR: Unable to open file!\n");
+		error("ERROR: Unable to open file!\n");
 	printf("File: %s\n", file_addr);
 	read_binary_file(fp, mode);	
 }
@@ -43,14 +57,14 @@ void read_binary_file(FILE *fp, char mode)
 	{
 		free(buffer);
 		printf("ERROR Info:\nfile_size=%lu\n",file_size);
-		handle_error("ERROR: Insufficient heap space for allocation!");
+		error("ERROR: Insufficient heap space for allocation!");
 	}
 	result = fread(buffer, 1, file_size, fp);
 	if(result!=file_size)
 	{
 		free(buffer);
 		printf("ERROR Info:\nfile_size=%lu\nresult=%lu\n",file_size, result);
-		handle_error("ERROR: File reading error!");
+		error("ERROR: File reading error!");
 	}
 	printf("Size = %lu bytes\n", file_size);
 	print_content(buffer, file_size, mode);	
@@ -85,7 +99,11 @@ void print_element(char *buffer, unsigned int index, char mode)
 			break;
 		case 'd':
 			if(index%16==0)
+			{
+				if(index%256==0&&index>0)
+					printf("\n------------------------------------------------------------------------------------------");
 				printf("\n%05x: ", index);
+			}
 			printf("%03d ", (int)(*(unsigned char*)(&buffer[index])));
 			break;
 		case 'C':
