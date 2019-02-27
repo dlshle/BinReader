@@ -15,6 +15,18 @@ void error(char *msg)
 	exit(1);
 }
 
+void print_r(char c, int len, int new_line)
+{
+	if(len==0)
+	{
+		if(new_line)
+			printf("\n");
+		return ;
+	}
+	printf("%c",c);
+	print_r(c,len-1,new_line);
+}
+
 int main(int argc, char* argv[])
 {
 	if(argc<3)
@@ -40,7 +52,6 @@ void open_file(FILE *fp, char* file_addr, char mode)
 	fp = fopen(file_addr, "rb");
 	if(fp == NULL)
 		error("ERROR: Unable to open file!\n");
-	printf("File: %s\n", file_addr);
 	read_binary_file(fp, mode);	
 }
 
@@ -66,9 +77,9 @@ void read_binary_file(FILE *fp, char mode)
 		printf("ERROR Info:\nfile_size=%lu\nresult=%lu\n",file_size, result);
 		error("ERROR: File reading error!");
 	}
-	printf("Size = %lu bytes\n", file_size);
 	print_content(buffer, file_size, mode);	
 	printf("\n");
+	printf("Size = %lu bytes\n", file_size);
 	fclose(fp);
 	free(buffer);
 }
@@ -89,7 +100,10 @@ void print_element(char *buffer, unsigned int index, char mode)
 			if(index%16==0)
 			{
 				if(index%256==0&&index>0)
-					printf("\n--------------------------------------------------------------------------");
+				{
+					printf("\n");
+					print_r('-',75,0);
+				}
 				printf("\n%05x: ", index);
 			}
 			printf("%02x ", (int)(*(unsigned char*)(&buffer[index])));
@@ -101,7 +115,10 @@ void print_element(char *buffer, unsigned int index, char mode)
 			if(index%16==0)
 			{
 				if(index%256==0&&index>0)
-					printf("\n------------------------------------------------------------------------------------------");
+				{
+					printf("\n");
+					print_r('-',90,0);
+				}
 				printf("\n%05x: ", index);
 			}
 			printf("%03d ", (int)(*(unsigned char*)(&buffer[index])));
@@ -119,7 +136,10 @@ void print_element(char *buffer, unsigned int index, char mode)
 					printf("|");
 				}
 				if(index%256==0&&index>0)
-					printf("\n--------------------------------------------------------------------------");
+				{
+					printf("\n");
+					print_r('-',74,0);
+				}
 				printf("\n%05x: ", index);
 			}
 			printf("%02x ", (int)(*(unsigned char*)(&buffer[index])));
@@ -138,7 +158,10 @@ void print_element(char *buffer, unsigned int index, char mode)
 					printf("|");
 				}
 				if(index%256==0&&index>0)
-					printf("\n--------------------------------------------------------------------------------------------------------------------------");
+				{
+					printf("\n");
+					print_r('-',122,0);
+				}
 				printf("\n%05x: ", index);
 			}
 			printf("%02x ", (int)(*(unsigned char*)(&buffer[index])));
